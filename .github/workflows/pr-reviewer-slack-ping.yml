@@ -129,9 +129,6 @@ jobs:
 
               while IFS= read -r login; do
                 [ -z "$login" ] && continue
-                # Skip self-mention
-                [ "$login" = "$COMMENTER" ] && continue
-                # Skip obvious non-users (teams written as org/team aren't matched anyway)
                 text=":speech_balloon: *Mentioned by @${COMMENTER}* on <${PR_URL}|${REPO}#${PR_NUM}>: ${PR_TITLE}
 > ${excerpt}
 <${COMMENT_URL}|Jump to comment>"
