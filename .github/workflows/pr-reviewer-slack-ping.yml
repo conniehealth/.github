@@ -8,11 +8,6 @@ on:
 
 jobs:
   ping:
-    if: |
-      (github.event_name == 'pull_request' && github.event.action == 'review_requested' && github.event.requested_reviewer != null) ||
-      (github.event_name == 'issue_comment' && github.event.action == 'created' && github.event.issue.pull_request != null) ||
-      (github.event_name == 'pull_request_review_comment' && github.event.action == 'created') ||
-      (github.event_name == 'pull_request_review' && github.event.action == 'submitted' && github.event.review.body != null)
     runs-on: ubuntu-latest
     steps:
       - name: Resolve and DM
@@ -94,6 +89,12 @@ jobs:
               ;;
 
             issue_comment|pull_request_review_comment|pull_request_review)
+              # Skip issue_comment on plain issues (no .issue.pull_request)
+              if [ "$EVENT_NAME" = "issue_comment" ]; then
+                is_pr=$(jq -r '.issue.pull_request != null' "$EVENT_PATH")
+                [ "$is_pr" != "true" ] && exit 0
+              fi
+
               # Mention-based ping
               if [ "$EVENT_NAME" = "issue_comment" ]; then
                 BODY=$(jq -r '.comment.body' "$EVENT_PATH")
