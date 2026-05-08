@@ -8,12 +8,16 @@ on:
 
 permissions:
   contents: read
+  issues: read
+  pull-requests: read
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      issues: read
+      pull-requests: read
     steps:
       - name: Resolve and DM
         env:
