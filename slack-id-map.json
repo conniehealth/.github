@@ -1,4 +1,18 @@
 {
-  "_comment": "Fallback GitHub login -> Slack user ID map. Used when users.lookupByEmail fails (no public email on GH, mismatched email, bot accounts). Add entries as needed.",
-  "CLF3721": "U06PMA0M6N7"
+  "_comment": "GitHub login -> Slack user ID. Used by pr-reviewer-slack-ping reusable workflow when users.lookupByEmail fails. Add new hires here. Built 2026-05-08 from org members + Slack search.",
+  "CLF3721": "U06PMA0M6N7",
+  "emi-connie": "U02P0N1T3QS",
+  "huanlai-ch": "U092CGWD9K7",
+  "jacob-ch": "UUXDUSMFC",
+  "jonathan-ch2021": "U0242Q7DF17",
+  "jorge-ch0996": "U023M3WFEJ1",
+  "marcio-ch": "U048SH61BML",
+  "maxime-griffon-ch": "U09LP0WL57H",
+  "paulo-ch": "U09BS5CTJCB",
+  "SamMoniz-ch": "U0ASJ810CF4",
+  "steven-ramsdell-ch": "U09GKCJS064",
+  "swamivenkatesan-ch": "U09MHBLPLBT",
+  "tophi-ch": "U063FRY7MPE",
+  "vinicius-ch": "U02PQE11LC8",
+  "vitran-ch": "U0ALD91D8JY"
 }
