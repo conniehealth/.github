@@ -1,0 +1,4 @@
+{
+  "_comment": "Fallback GitHub login -> Slack user ID map. Used when users.lookupByEmail fails (no public email on GH, mismatched email, bot accounts). Add entries as needed.",
+  "_example": "octocat: U01234567"
+}

@@ -1,0 +1,60 @@
+name: PR Reviewer Slack Ping
+
+on:
+  workflow_call:
+    secrets:
+      SLACK_PR_PING_TOKEN:
+        required: true
+
+jobs:
+  ping:
+    if: github.event_name == 'pull_request' && github.event.action == 'review_requested' && github.event.requested_reviewer != null
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve Slack user and DM
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_PR_PING_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          REVIEWER_LOGIN: ${{ github.event.requested_reviewer.login }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # 1. Resolve reviewer email from GitHub
+          email=$(gh api "users/${REVIEWER_LOGIN}" --jq '.email // empty')
+          slack_id=""
+
+          # 2. Try Slack lookupByEmail
+          if [ -n "$email" ]; then
+            resp=$(curl -sS -H "Authorization: Bearer ${SLACK_TOKEN}" \
+              "https://slack.com/api/users.lookupByEmail?email=$(printf %s "$email" | jq -sRr @uri)")
+            if [ "$(echo "$resp" | jq -r '.ok')" = "true" ]; then
+              slack_id=$(echo "$resp" | jq -r '.user.id')
+            fi
+          fi
+
+          # 3. Fallback: JSON map in this org repo (public, fetched via raw)
+          if [ -z "$slack_id" ]; then
+            map=$(curl -sSf https://raw.githubusercontent.com/conniehealth/.github/main/slack-id-map.json || echo '{}')
+            slack_id=$(echo "$map" | jq -r --arg login "$REVIEWER_LOGIN" '.[$login] // empty')
+          fi
+
+          if [ -z "$slack_id" ]; then
+            echo "::warning::No Slack ID for ${REVIEWER_LOGIN}; skipping ping"
+            exit 0
+          fi
+
+          # 4. Post DM
+          payload=$(jq -n \
+            --arg ch "$slack_id" \
+            --arg text ":eyes: *Review requested* on <${PR_URL}|${REPO}#$(basename "$PR_URL")>: ${PR_TITLE} — by @${PR_AUTHOR}" \
+            '{channel:$ch, text:$text, unfurl_links:false}')
+
+          curl -sS -X POST \
+            -H "Authorization: Bearer ${SLACK_TOKEN}" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data "$payload" \
+            https://slack.com/api/chat.postMessage | jq -e '.ok' >/dev/null
