@@ -6,9 +6,14 @@ on:
       SLACK_PR_PING_TOKEN:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   ping:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Resolve and DM
         env:
